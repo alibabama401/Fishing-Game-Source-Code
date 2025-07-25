@@ -1,0 +1,800 @@
+syntax = "proto3";
+
+option cc_generic_services=false;
+
+//
+package XGameDZProto;
+
+//协议版本
+enum E_Proto_Version
+{
+    iProtoVersionDefault    = 0;
+    iProtoVersion           = 1021;  //协议版本
+}
+
+//消息号枚举，CS发送和接受为同一消息号
+enum E_msg_ID 
+{
+    MSG_ID_BEGIN = 0;
+
+    NN_msg2cTestBegin_E     = 10;   //房间发起sitdown后，发该消息，类似于举手，只有命令字，无消息内容
+    NN_msg2cStand_E         = 12;   //站起
+    NN_msg2cSit_E           = 13;   //坐下
+    NN_msg2sGameBegin_E     = 15;   //游戏开局
+    NN_msg2sFrontBet_E      = 20;   //前注
+    NN_msg2sUpdatePool_E    = 25;   //奖池变更
+    NN_msg2sGameBanker_E    = 30;   //定庄
+    NN_msg2sSendHdCard_E    = 35;   //手牌
+    NN_msg2sTokenNotify_E   = 40;   //act通知
+    NN_msg2csTokenBet_E     = 45;   //下注请求及应答
+    NN_msg2sSendComCard_E   = 50;   //翻牌
+    NN_msg2sSendTurnCard_E  = 55;   //转牌
+    NN_msg2sSendRiverCard_E = 60;   //河牌
+    NN_msg2csShowHdCard_E   = 65;   //摊牌
+    NN_msg2cInsureNotice_E  = 66;   //投保通知
+    NN_msg2csInsure_E       = 67;   //投保
+    NN_msg2sSendNegCard_E   = 68;   //协商发牌
+    NN_msg2sGameEnd_E       = 70;   //游戏结束
+    NN_msg2sTimerBegin_E    = 75;   //开始时间
+    NN_msg2sTimerEnd_E      = 80;   //结束时间
+    NN_msg2csGameStation_E  = 85;   //游戏统计
+    NN_msg2csGuessHdCard_E  = 90;   //猜测手牌
+    NN_msg2csTestCard_E     = 95;   //配牌
+    NN_msg2csGetRecord_E    = 100;  //游戏记录
+    NN_msg2sAutoBet_E       = 105;  //自动下注
+    NN_msg2csGetBuy_E       = 110;  //取买入信息
+    NN_msg2cBuyChip_E       = 115;  //买入
+    NN_msg2sMessageTip_E    = 120;  //提示消息
+    NN_msg2sUpdateWealth_E  = 121;  //财富变更
+    NN_msg2csShowComCard_E  = 131;  //查看公共牌
+    NN_msg2csProlong_E      = 141;  //时间延长
+    NN_msg2csProlongInfo_E  = 142;  //时间延长信息
+    NN_msg2csGameNotice_E   = 143;  //游戏通知
+    NN_msg2sSendHdPoint_E   = 144;  //牌力
+    NN_msg2sDZWealth_E      = 145;  //玩家筹码
+    NN_msg2cTuoGuan_E       = 146;  //托管状态
+    NN_msg2csTuoGuan_E      = 147;  //取消状态
+    NN_msg2aiDeing_E        = 148;  //AI发牌
+    NN_msg2aiAction_E       = 149;  //AI行动
+    NN_msg2aiJetton_E       = 150;  //AI筹码
+    NN_msg2aiBanker_E       = 151;  //AI庄家
+    NN_msg2aiActionToken_E  = 152;  //AI行动指示
+    NN_msg2cRobotWinNum_E   = 153;  //机器人累积赢取筹码
+    NN_msg2csResetChallenge_E  = 154; //重新挑战
+	NN_msg_c2s_ReserveLeaveTable_E  = 155; //保留离桌
+	NN_msg_c2s_BigBlindsSit_E = 156;	//大盲入桌
+    NN_msg2sNegNotify_E     = 160; //协商发牌通知
+    NN_msg2sNegAcceptNotify_E  = 161; //协商发牌接受通知
+    NN_msg2csNeg_E          = 165; //协商
+    NN_msg2csNegAccept_E    = 166; //协商接受
+    NN_msg2sMessageMustBuy_E   = 171;  //系统强买保险通知
+    NN_msg2sSendRedPot_E = 172; //发放红包奖池
+    NN_msg2sSendJackPot_E      = 173; //发放牌型奖池
+    NN_msg2sSNGTurnTable_E    = 174; //比赛场转盘抽奖
+    NN_msg2csLookNextCards_E     = 175;//看看发什么
+    NN_msg2csLookOtherCards_E =  176;//偷看手牌
+    MSG_ID_END = 1000;
+}
+
+//
+message NN_sCard
+{
+    sint32 iCardType = 1;
+    repeated sint32 vCard = 2;
+}
+
+message NN_sBoxInfo
+{
+    sint32 curBoxNum = 1;       // 当天已获得宝箱数量
+    sint32 allBoxNum = 2;       // 每天获得宝箱上限数量 > 0
+    sint32 curRound  = 3;       // 当前玩牌局数
+    sint32 allRound  = 4;       // 获取该轮宝箱加速的总局数(走配置 8, 12, 15, 20)
+    sint32 curSpeed  = 5;       // 当前加速情况 默认值=1, (逐渐 + 50% 直到 300%, 就不再叠加了)
+    sint32 progress  = 6;       // 获得单个宝箱的进度
+    sint32 totalBoxNum = 7;     // 未领奖的宝箱数量
+    sint64 lPlayerID = 8;       //玩家ID（服务器用）
+}
+
+//NN_msg2cTestBegin_E
+message NN_msg2sTestBegin
+{
+    map<sint32, sint64> mDZWealth = 1;
+}
+
+//NN_msg2cStand_E         = 12;    //站起
+message NN_msg2cStand
+{
+    sint32 ret = 1;         //0--成功， 其他--失败
+    sint32 iChairID = 2;    //站起成功的座位号，失败无意义
+    bool bBuyIN = 3;     //
+}
+
+//NN_msg2cSit_E           = 13;    //坐下
+message NN_msg2sSit
+{
+    bool bAutoSit = 1;      //是否自动选座位 @如果bAutoSit为true，则iChatID为-1
+    sint32 iChairID = 2;    //桌子位置
+    sint64 ltakeCoin = 3;       //买入金额
+    bool bAutoSupplement = 4;   //自动补充
+    bool bMaxTakenIn = 5; //是否最大带入
+}
+
+message NN_msg2cSit
+{
+    sint32 ret = 1;         //0--成功， 其他--失败
+    sint32 iChairID = 2;    //坐下成功的座位号，失败无意义
+    sint64 uid = 3;         //用户ID
+    sint64 mDZWealth = 4;   //财富信息
+    string sNickName = 5;    //玩家昵称
+    string sHeadStr = 6;     //头像路径
+    sint32 iPlayerGender = 7;  //玩家性别 0-未知 1-男 2-女
+    sint32 iLeagueLevel = 8;// 联赛等级
+    string sCountryId = 9;//国籍
+}
+
+//NN_msg2sGameBegin_E
+message NN_msg2sGameBegin
+{
+    map<sint32, sint64> mDZWealth = 1;
+    map<sint32, sint64> mUAiGameRound = 2; // ai 挑战次数
+    map<sint32, sint64> mUAiGamePoint = 3; // ai 挑战积分
+    map<sint32, bool> mTuoGuan = 4;
+    map<sint32, NN_sBoxInfo> mBoxes = 5;//宝箱信息（key:座位id）
+}
+
+//NN_msg2sFrontBet_E      = 20;    //前注
+message NN_msg2sFrontBet
+{
+    //sint64 lBetNum = 1;
+    map<sint64, sint64> mDZWealth = 1;
+    map<sint64, sint64> mDZBetNum = 2;
+}
+
+//NN_msg2sTokenNotify_E   = 40;   //act通知
+message NN_msg2sTokenNotify
+{
+    sint32          iCid      = 1;
+    sint32          iDZAct    = 2;
+    sint64          lBetNum   = 3;
+    sint64          lLastPool = 4; //上轮底池
+    sint64          lRaiseNum = 5; //加注数
+    bool            bisFirst  = 6; //手牌阶段首次操作
+    sint64          lBlindNum = 7; //大盲注
+    repeated sint32 iJettons  = 8; //下注筹码列表
+    sint32          iRoundRaiseCount = 9; //本轮下注次数
+    sint32          iRoundFlag  = 10; //轮数（4-7）
+    sint64          lRaiseTo    = 11; //加注到
+    sint64          lRoundMaxBet = 12; //本轮最大下注
+}
+
+//NN_msg2csTokenBet_E, 客户端上行
+message NN_msg2cTokenBet
+{
+    sint32 iDZAct = 1;
+    sint64 lBetNum = 2;
+    sint64 lLastPool = 3; //上轮底池
+    sint64 lRaiseNum = 4; //加注数
+
+    sint32  iRoundRaiseCount = 5; //本轮下注次数
+    sint32  iRoundFlag  = 6; //轮数（4-7）
+    sint64  lRaiseTo    = 7; //加注到
+}
+
+//NN_msg2csTokenBet_E, 服务端下行
+message NN_msg2sTokenBet
+{
+    sint32 iCid = 1;
+    sint32 iDZAct = 2;
+    sint64 lBetNum = 3;
+    sint64 lPoolNum = 4;
+    sint64 lDZWealth = 5;
+    string err_msg = 6;
+}
+
+//NN_msg2sUpdatePool_E    = 25;    //奖池变更
+message NN_msg2sUpdatePool
+{
+    repeated sint32 vBetCid = 1;  // 这局游戏下注的人
+    repeated sint64 vPoolNum = 2; // 各池子筹码总量
+    bool isFront = 3;
+    message NN_cidPoolNum
+    {
+        repeated sint64 vPoolNum = 1; // 筹码去向，各池子数量
+    }
+    map<sint32, NN_cidPoolNum> mCidPoolNum = 4; // 本轮下注玩家筹码去向 cid -> vPoolNum
+}
+
+//NN_msg2sUpdateWealth_E  = 121;  //财富变更
+message NN_msg2sUpdateWealth
+{
+    map<sint64, sint64> mDZWealth = 1;
+}
+
+//NN_msg2sGameBanker_E    = 30;    //定庄
+message NN_msg2sGameBanker
+{
+    sint32 iBankerCid = 1;
+    map<sint32, sint64> mBlindNum = 2;
+    map<sint32, sint64> mDZWealth = 3;
+    sint64 lPoolNum = 4;
+    sint32 iSbCid = 5;
+    sint32 iBbCid = 6;
+}
+
+//NN_msg2sSendHdCard_E    = 35;   //手牌
+message NN_msg2sSendHdCard
+{
+    message NN_hdCard
+    {
+        repeated sint32 hdcard = 1;
+    }
+    map<sint32, NN_hdCard> mHdCard = 1;
+}
+
+//NN_msg2sSendComCard_E   = 50;   //发公牌
+message NN_msg2sSendComCard
+{
+    repeated sint32 vComCard = 1;
+    NN_sCard sCard = 2;
+}
+
+//NN_msg2sSendTurnCard_E  = 55;   //转牌
+message NN_msg2sSendTurnCard
+{
+    sint32 iTurnCard = 1;
+    NN_sCard sCard = 2;
+}
+
+//NN_msg2sSendRiverCard_E = 60;   //河牌
+message NN_msg2sSendRiverCard
+{
+    sint32 iRiverCard = 1;
+    NN_sCard sCard = 2;
+}
+
+//NN_msg2sSendNegCard_E = 68;   //协商发牌
+message NN_msg2sSendNegCard
+{
+    repeated sint32 vNegCard = 1;
+    NN_sCard sCard           = 2;
+    sint32 iState            = 3; // 协商发牌阶段 HD_CARD 发 5 张 / COMMON_CARD 发 2 张 / TURN_CARD 发 1 张
+    sint32 iNegRound         = 4; // 第几轮，1 = 第二次发牌 / 2 = 第三次发牌，类推
+}
+
+//NN_msg2sGameEnd_E       = 70;   //游戏结束
+message NN_msg2sGameEnd
+{
+    map<sint32, NN_sCard> mCard = 1;
+    message NN_winPool
+    {
+        repeated sint32 winpool = 1;
+    }
+    repeated NN_winPool mWinPool = 2;
+    message NN_hdCard
+    {
+        repeated sint32 hdcard = 1;
+    }
+    map<sint32, NN_hdCard> mHdCard = 3;
+    map<sint32, sint64> mDZChange = 4;
+    map<sint32, sint64> mDZWealth = 5;
+    message NN_poolDetail // 暂时不用，等新版本起用
+    {
+        sint64 num       = 1;      // 赢得金额
+        sint64 profit    = 2;      // 抽水金额
+        
+        // 购买保险的钱
+        // 1. 如果最终平局平分奖池，只有购买的人才会有值
+        // 2. 与协商无关，协商后不会有保险
+        sint64 insureBuy = 3;
+        sint64 insurePay = 4;      // 保险的总收入，扣了买入的钱
+    }
+    message NN_poolGroup
+    {
+        map<sint32, NN_poolDetail> mPoolGroup = 1; // cid -> 抽完水的筹码
+    }
+    repeated NN_poolGroup poolInfo = 6; // 每个池子给不同人分多少钱
+    NN_sUserAiInfo aiInfo = 7;
+    sint64 profitNum = 8; //服务费
+    map<sint32, NN_sBoxInfo> mBoxes = 9;//宝箱信息（key:座位id）
+    sint32 ratio = 10;//抽水比例，无抽水为0，有则是百分比
+    message NN_NegDetail
+    {
+        repeated sint32 vComCard               = 1; // 协商公共牌，五张
+        sint32 iNegNum                         = 2; // 额外第 iNegNum 次发牌（一次 / 两次）
+        sint32 iNegCardNum                     = 3; // 协商里面发了 iNegCardNum 张牌（五张 / 两张 / 一张）
+        map<sint32, NN_sCard> mCard            = 4; // 玩家最高的牌
+        repeated NN_winPool mWinPool           = 5; // 每个池子的赢家
+        repeated NN_poolGroup poolInfo         = 6; // 每个池子给不同人分多少钱
+    }
+    repeated NN_NegDetail mNegDetail = 11; // 协商情况
+    sint32 calcTime = 12;//结算时间 s
+    map<sint32, sint64> insureWins = 13;//保险购买+赔付
+}
+
+//NN_msg2csShowHdCard_E   = 65;   //显示手牌
+message NN_msg2cShowHdCard  
+{
+    repeated sint32 hdcard = 1;
+}
+
+message NN_msg2sShowHdCard
+{
+    message NN_hdCard
+    {
+        repeated sint32 hdcard = 1;
+    }
+    map<sint32, NN_hdCard> mHdCard = 1;
+}
+//NN_msg2cInsureNotice_E = 66;  // 保险 - 通知
+message NN_msg2cInsureNotice
+{
+    message NN_userInfo
+    {
+        sint64 lPlayerID          = 1;   // 用户ID
+        string sNickName          = 2;   // 昵称
+        repeated sint32 iHandCard = 3;   // 手牌
+        repeated sint32 iOutCard  = 4;   // outs牌
+    }
+    sint64 lPlayerID            = 1;    // 买保险的用户ID
+    sint64 lMinAmont            = 2;    // 最小投注额
+    sint64 lMaxPool             = 3;    // 池子总金额
+    sint64 lOptionTimeEnd       = 4;    // 思考结束时间戳
+    sint32 iCardCount           = 5;    // 牌盒剩余牌数
+    sint32 iMust                = 6;    // 是否必买 0 否 1 是
+    repeated sint32 iSelectCard = 7;    // 可选择的牌
+    repeated sint32 iCommonCard = 8;    // 公共牌
+    repeated sint32 iPlayerCard = 9;    // 买保险的手牌
+    repeated NN_userInfo infos  = 10;   // 反超者
+	repeated sint64 lSelectAmount = 11;	// 保险购买金额
+}
+
+//NN_msg2csInsure_E = 67;       // 保险 - 投保
+message NN_msg2sInsure
+{
+    sint64 lAmount = 1;                 // 购买金额
+    repeated sint32 iSelectCard = 2;    // 选择的牌
+}
+message NN_msg2cInsure
+{
+    sint32 iRet = 1;    // 0 -- 成功 其它--失败
+	sint64 lPlayerID            = 2;    // 买保险的用户ID
+}
+message NN_sConfig  
+{
+    sint32 iFrontBet = 1;
+    sint32 iBlindNum = 2;
+    sint32 iMinTake = 3;
+    map<sint32, sint32> mGuessType = 4;
+    repeated sint32 vGuessNum = 5;
+    repeated sint32 vUserID = 6;
+}
+
+message NN_sUserInfo
+{
+    sint64 lPlayerID = 1;    //用户ID
+    string sNickName = 2;    //玩家昵称
+    string sHeadStr = 3;     //头像路径
+    sint32 iPlayerGender = 4;  //玩家性别 0-未知 1-男 2-女
+    bool bShowAchievement = 5;//是否显示成就
+    sint32 iLeagueLevel = 6;// 联赛等级
+    string sCountryId = 7; // 国籍
+    sint64 lReserveLeaveTableTime = 8;//保位离桌时间
+    bool isWaitBigblindsSit = 9;       //是否等待大盲坐下 0 - 不等待 1 - 等待
+    bool hasBigblindsSit = 10;     //是否已经大盲过，只要不换桌子只会触发一次大盲坐下，防刷用
+    bool isLeft = 11;//是否已经离开
+   
+}
+
+message NN_sUserAiInfo
+{
+    sint32 iAiGameRound = 1;  //ai挑战次数
+    sint32 iAiGamePoint = 2;  //ai挑战积分
+    sint32 iAiGameRoundLimit = 3; //ai挑战局数上限配置
+}
+
+message NN_msg2sGameStation
+{
+    NN_sConfig sConfig = 1;
+    sint32 iState = 2;
+    sint32 iBankerCid = 3;
+    sint32 iTokenCid = 4;
+    bool bDone = 5;
+    sint64 lPoolNum = 6;
+    NN_msg2cTokenBet sTokenBet = 7;
+    NN_sCard sCard = 8;
+    repeated sint32 vComCard = 9;
+    map<sint32, sint32> mOption = 10;
+    message NN_hdCard
+    {
+        repeated sint32 hdcard = 1;
+    }
+    map<sint32, NN_hdCard> mHdCard = 11;
+    map<sint32, NN_sUserInfo> mUserInfo = 12;
+    repeated sint64 vPoolNum = 13;
+    map<sint32, sint64> mBetNum = 14;
+    map<sint32, sint64> mDZWealth = 15;
+    sint32 iOptime = 16; //剩余操作时间
+    sint32 iSmallBindCid = 17; //小盲位置
+    sint32 iBigBindCid = 18; //大盲位置
+    sint64 lSmallBet = 19; //小盲压注数
+    sint64 lBigBet = 20; //大盲压注数
+    bool bisFirst  = 21; 
+    sint32 hd_point =22;//牌力
+    bool bWatchGame = 23;  //是否观战
+    map<sint32, sint32> mUBet = 24;
+    map<sint32, bool> mTuoGuan = 25;
+    map<sint32, bool> mWatchGame = 26;
+    sint32 iOptionTimeCfg = 27; //思考时间
+    NN_sUserAiInfo aiInfo = 28;
+    sint32 iBlindLevel = 29; //当前盲注等级
+    sint32 iRemainRaiseRime = 30;// 剩余升盲时间
+    map<sint32, NN_sBoxInfo> mBoxes = 31;//宝箱信息（key:座位id）
+    sint32 lMatchBeginTime = 32;
+    NN_insureNotice insure           = 33;   // 保险
+    sint64 lRedPot = 34; //红包奖池
+    sint64 lBuyChip = 35; //设置带入金额
+    bool isNextStand = 36;
+    
+	message NN_userInfo
+    {
+        sint64 lPlayerID          = 1;   // 用户ID
+        string sNickName          = 2;   // 昵称
+        repeated sint32 iHandCard = 3;   // 手牌
+        repeated sint32 iOutCard  = 4;   // outs牌
+    }
+    message NN_insureNotice
+    {
+        sint64 lPlayerID            = 1;    // 买保险的用户ID
+        sint64 lMinAmont            = 2;    // 最小投注额
+        sint64 lMaxPool             = 3;    // 池子总金额
+        sint64 lOptionTimeEnd       = 4;    // 思考结束时间戳
+        sint32 iCardCount           = 5;    // 牌盒剩余牌数
+        sint32 iMust                = 6;    // 是否必买 0 否 1 是
+        repeated sint32 iSelectCard = 7;    // 可选择的牌
+        repeated sint32 iCommonCard = 8;    // 公共牌
+        repeated sint32 iPlayerCard = 9;    // 买保险的手牌
+        repeated NN_userInfo infos  = 10;   // 反超者
+		repeated sint64 lSelectAmount = 11;	// 保险购买金额
+    }
+}
+
+message NN_msg2sTimerBegin
+{
+    sint32 iTime = 1;
+    sint32 iXtkey = 2;
+}
+
+message NN_msg2csGuessHdCard
+{
+    sint32 iGuessType = 1;
+    sint64 lGuessNum = 2;
+}
+
+//NN_msg2csTestCard_E     = 95;   //配牌
+message NN_msg2cTestCard
+{
+    repeated sint32 vHdCard = 1;
+    repeated sint32 vComCard = 2;
+}
+
+message NN_msg2sTestCard
+{
+    NN_msg2cTestCard sTestCard = 1;
+    NN_sCard sCard = 2;
+}
+
+message NN_sAct
+{
+    sint32 iDZAct = 1;
+    sint64 lBetNum = 2;
+}
+
+message NN_sUser
+{
+    string url = 1;
+    string name = 2;
+    sint64 uid = 3;
+    sint32 cid = 4;
+    sint64 change = 5;
+    sint32 iCardType = 6;
+    repeated sint32 vHdCard = 7;
+    repeated sint32 vComCard = 8;
+    map<sint32, NN_sAct> mAct = 9;
+    sint64 jackpot = 10;//牌型奖池
+    sint64 sysInsure = 11;//保险收益
+}
+
+message NN_sRecord
+{
+    sint32 iBankerCid = 1;
+    sint32 iBigBlindCid = 2;
+    sint32 iSmallBlindCid = 3;
+    bool bComplete = 4;
+    sint32 time = 5;
+    repeated NN_sUser vUser = 6;
+    repeated sint64 wincid = 7;//赢家id
+    sint64 betpool = 8;//底池
+}
+
+//NN_msg2csGetRecord_E    = 100;  //游戏记录
+message NN_msg2sGetRecord   
+{
+    repeated NN_sRecord vRecord = 1;
+}
+
+//NN_msg2sAutoBet_E       = 105;  //自动下注
+message NN_msg2sAutoBet 
+{
+    sint64 lBetNum = 1;
+}
+
+//NN_msg2cBuyChip_E       = 115;  //买入
+message NN_msg2cBuyChip 
+{
+    sint64 lBuyNum = 1;
+    bool bAutoMax  = 2;
+}
+message NN_msg2sBuyChipRsp
+{
+    sint32 iRet = 1;
+    sint64 mDZWealth = 2;
+    bool bAddNow = 3;   //是否叠加玩家金币
+}
+//NN_msg2csGetBuy_E       = 110; //取买入信息
+message NN_msg2sGetBuy  
+{
+    sint64 lWealth = 1;
+    NN_msg2cBuyChip sBuyChip = 2;
+}  
+
+//NN_msg2sMessageTip_E    = 120;
+message NN_msg2sMessageTip  
+{
+    sint32 iTip = 1;
+}
+
+//NN_msg2csShowComCard_E  = 131;  //查看公共牌
+message NN_msg2cShowComCardRsp
+{
+    sint32 iRet = 1;
+    repeated sint32 vComCard = 2; //公牌
+}
+
+//NN_msg2csProlong_E      = 141;  //时间延长
+message NN_msg2cPrologRsp
+{
+    sint32 iRet = 1;
+    sint32 iTimeLeft = 2;  //剩余时间
+    sint32 iCId = 3; // 座位号
+}
+
+//NN_msg2csProlongInfo_E  = 142;  //时间延长信息
+message NN_msg2cPrologInfoRsp
+{
+    sint32 iRet = 1;
+    sint32 multiple = 2;  //倍数
+    sint32 iRemainTimes = 3;//剩余次数
+}
+
+//NN_msg2csGameNotice_E
+message NN_msg2sGameNotice
+{
+    sint32 iNoticeType = 1;
+}
+
+//NN_msg2sSendHdPoint_E
+message NN_msg2sSendHdPoint
+{
+    sint32  hd_point = 1;
+}
+
+//默认应答消息
+message NN_msg2csDefault    
+{
+    sint32 iRet = 1;
+}
+
+//NN_msg2sUBet_E
+message NN_msg2sDZWealth
+{
+    map<sint32, sint64> mDZWealth = 1;
+}
+
+//NN_msg2cTuoGuan_E
+message NN_msg2cTuoGuan
+{
+    sint32 iRet = 1;
+    bool bTuoGuan =2;
+    sint32 cid = 3;
+}
+
+//NN_msg2csTuoGuan_E
+message NN_msg2csTuoGuan
+{
+    bool bTuoGuan = 2;
+}
+
+message NN_PlayerCards
+{
+    uint64 guid = 1;
+    repeated sint32 card = 2;
+}
+
+message NN_msg2aiDeing
+{
+    sint32 round   = 1;
+    sint32 finished = 2;
+    repeated NN_PlayerCards user_cards  = 3;
+    repeated sint32 flop_cards  = 4;
+    repeated sint32 turn_cards  = 5;
+    repeated sint32 river_cards = 6;
+}
+
+message NN_msg2aiAction
+{
+    uint64 player_id    = 1;
+    uint32 action_type  = 2;
+    uint32 action_value = 3;
+}
+
+message NN_msg2aiJetton
+{
+    uint64 player_id = 1;
+    repeated sint32 jetton = 2;
+}
+
+message NN_msg2aiBanker
+{
+    uint64 banker_id   = 1;
+    sint32 banker_seat = 2;
+    uint64 sb_id       = 3;
+    sint32 sb_seat     = 4;
+    uint64 bb_id       = 5;
+    sint32 bb_seat     = 6;
+}
+
+message NN_msg2aiActionToken
+{
+    uint64 player_id = 1;
+    repeated sint32 jetton  = 2;
+}
+
+message NN_msg2cRobotWinNum
+{
+    uint64  player_id = 1;
+    uint64  totalRobotWinNum = 2; //本桌机器人累积赢取的筹码
+    uint64  sngRobotWinNum = 3;
+    uint64  sngRobotPreWinNum = 4;
+}
+
+message NN_msg2sResetChallengeRsp // 重新挑战
+{
+    sint32 iRet = 1;
+}
+
+//NN_msg_c2s_ReserveLeaveTable_E     = 155; //保留离桌
+message NN_msg_c2s_ReserveLeaveTable
+{
+    bool isleave = 1;   //是否保留离桌
+}
+
+message NN_msg_s2c_ReserveLeaveTable
+{
+    sint32 iret = 1;
+    bool isleave = 2;   //是否保留离桌
+    int32 leave_time = 3; //离桌时间戳
+    sint32 icid = 4;    // 座位号
+}
+
+//NN_msg_c2s_BigBlindsSit_E = 156;	//大盲入桌
+message NN_msg_c2s_BigBlindsSit
+{
+    bool isWaitBigblindsSit = 1;   //是否等待大盲入桌
+}
+
+message NN_msg_s2c_BigBlindsSit
+{
+    sint32 iret = 1;
+    bool isWaitBigblindsSit = 2;   //是否等待大盲入桌
+}
+
+//////////////////////////////////////////
+
+//NN_msg2sNegNotify_E   = 160;   // 请求协商通知
+// 1. 广播通知，落后的确认协商
+// 2. 客户端上行，落后的上报，超时会自动选择发一次
+// 3. 服务端下行，告诉房间协商是否需要协商
+message NN_msg2sNegotiationNotify
+{
+    sint32 iCid      = 1; // 通知的目标
+    sint32 iState    = 2; // 当前阶段 HD_CARD/COMMON_CARD/TURN_CARD
+    sint64 lOptionTimeEnd       = 3;    // 思考结束时间戳
+}
+
+//NN_msg2csNeg_E   = 165, 客户端上行
+message NN_msg2cNegotiation
+{
+    sint32 lNegNum   = 1; // 发次数
+    sint32 iState    = 2; // 当前阶段 HD_CARD/COMMON_CARD/TURN_CARD
+}
+
+//NN_msg2csNeg_E   = 165, 服务端下行
+message NN_msg2sNegotiation
+{
+    sint32 iCid      = 1;
+    sint32 iState    = 2; // 当前阶段 HD_CARD/COMMON_CARD/TURN_CARD
+    sint32 lNegNum   = 3; // 发次数
+}
+
+//NN_msg2sNegAcceptNotify_E   = 161;   // 协商接受或拒绝通知
+// 1. 广播通知，领先人接受或拒绝协商
+// 2. 客户端上行，领先的上报，超时会自动拒绝
+// 3. 服务端下行，告诉房间协商结果
+message NN_msg2sNegotiationAcceptNotify
+{
+    sint32 iCid      = 1; // 通知的目标
+    sint32 iState    = 2; // 当前阶段 HD_CARD/COMMON_CARD/TURN_CARD
+    sint32 iNegCid   = 3; // 请求协商的玩家 ID
+    sint32 lNegNum   = 4; // 发次数
+    sint64 lOptionTimeEnd       = 5;    // 思考结束时间戳
+}
+
+//NN_msg2csNegAccept_E   = 166, 客户端上行
+message NN_msg2cNegotiationAccept
+{
+    bool   bAccept   = 1; // 是否接受
+    sint32 iState    = 2; // 当前阶段 HD_CARD/COMMON_CARD/TURN_CARD
+}
+
+//NN_msg2csNegAccept_E   = 166, 服务端下行
+message NN_msg2sNegotiationAccept
+{
+    sint32 iCid      = 1;
+    sint32 iState    = 2; // 当前阶段 HD_CARD/COMMON_CARD/TURN_CARD
+    bool   bAccept   = 3; // 是否接受
+    sint32 iNegCid   = 4; // 请求协商的玩家 ID
+    sint32 lNegNum   = 5; // 发次数
+}
+
+//NN_msg2sMessageMustBuy_E
+message NN_msg2sMessageMustBuy   
+{
+    sint64 lBuy = 1;   // 强制购买保险额度
+};
+//通知客户端发放红包奖池
+message NN_msg2sSendRedPot
+{
+    sint64 lRedPot = 1;
+}
+//通知客户端发放牌型奖励 jackpot
+message NN_msg2sSendJackPot
+{
+    sint64 lJackPot = 1;
+    sint64 luid = 2;         //用户ID
+}
+//NN_msg2sSNGTurnTable_E    = 174; //比赛场转盘抽奖
+message NN_msg2sSNGTurnTable
+{
+    sint32 iIndex = 1; //格子索引
+    sint64 lBase = 2; //基础系数
+}
+
+//NN_msg2csLookNextCards 看看发什么 
+message NN_msg2sLookNextCards
+{
+    repeated sint32 vComCard = 1; //公牌
+}
+
+//NN_msg2csLookOtherCards 偷看手牌 
+message NN_msg2sLookOtherCards
+{    
+    message UserCard
+    {
+        sint32 iCid      = 1;
+        repeated sint32 vCard = 2; //手牌
+    }
+    sint32 iRet = 1;
+    repeated UserCard vUserCard = 2; 
+}
+
+

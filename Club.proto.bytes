@@ -1,0 +1,193 @@
+syntax = "proto3";
+
+option cc_generic_services = false;
+
+package ClubProto;
+
+// 俱乐部职位
+enum E_CLUB_POSITION
+{
+    CLUB_PRESIDENT = 0;  // 会长
+    CLUB_MANAGER   = 1;  // 管理员  //暂无
+    CLUB_MEMBER    = 2;  // 成员
+}
+
+// 俱乐部基本信息
+message ClubInfo
+{
+    sint64  clubId          = 1;  // 俱乐部ID
+    string  clubName        = 2;  // 俱乐部名称
+    sint32  clubLevel       = 3;  // 俱乐部级别(级别决定上限如:成员数量，管理员数量等)
+    string  clubAvatar      = 4;  // 俱乐部头像
+    string  clubNotice      = 5;  // 俱乐部宣言
+    sint64  clubCreated     = 6;  // 创建时间
+    string  createrName     = 7;  // 创建者名字
+    sint64  messageCount    = 8;  // 消息数量
+    sint64  tableCount      = 9;  // 牌桌数量
+}
+
+// 创建俱乐部  // 注:头像与宣言客户端要做一层过滤
+message CreateClubReq
+{
+    string clubAvatar = 1;  // 俱乐部头像
+    string clubName   = 2;  // 俱乐部名字
+    string clubNotice = 3;  // 俱乐部宣言
+}
+
+message CreateClubResp
+{
+    sint32 resultCode  = 1;  //结果码 0 成功
+}
+
+// 解散俱乐部
+message DissolveClubReq
+{
+    sint64 clubId = 1; // 俱乐部ID
+}
+
+message DissolveClubResp
+{
+    sint32 resultCode = 1; // 结果码 0 成功
+}
+
+// 更新俱乐部基本信息 // 注:头像与宣言客户端要做一层过滤
+message UpdateClubReq
+{
+    sint64 clubId     = 1;  // 俱乐部ID
+    string clubAvatar = 2;  // 俱乐部头像
+    string clubName   = 3;  // 俱乐部名字
+    string clubNotice = 4;  // 俱乐部宣言
+}
+
+message UpdateClubResp
+{
+    sint32 resultCode = 1;  // 结果码 0 成功
+    ClubInfo clubInfo = 2;  // 俱乐部信息 
+}
+
+
+// 俱乐部列表
+message ClubListReq
+{
+    sint32 clubFilter = 1; // 过滤条件（1 已创建 2:已经加入)
+    sint32 pageIndex  = 2; // 分页(50一页)
+}
+
+message ClubListResp
+{
+    sint32 resultCode       = 1;    // 0 成功 注:分页超过最大值(infos为空 infoCount会更新)
+    sint32 infoCount        = 2;    // 数量
+    repeated ClubInfo infos = 3;    // 俱乐部列表信息
+}
+
+// 申请加入俱乐部
+message ApplyJoinClubReq
+{
+    sint64 clubId      = 1;     // 俱乐部ID
+}
+
+message ApplyJoinClubResp
+{
+    sint32 resultCode = 1;      // 0 成功
+}
+
+// 踢出俱乐部
+message KickClubMemberReq
+{
+    sint64 clubId    = 1;       // 俱乐部ID
+    sint64 targetUid = 2;       // 目标UID
+}
+
+message KickClubMemberResp
+{
+    sint32 resultCode = 1;      // 0 成功
+    sint64 clubId     = 2;      // 俱乐部ID
+    sint64 targetUid  = 3;      // 目标UID
+}
+
+// 退出俱乐部
+message ExitClubReq
+{
+    sint64 clubId = 1;      // 俱乐部ID
+}
+
+message ExitClubResp
+{
+    sint32 resultCode = 1;  // 0 成功
+    sint64 clubId     = 2;  // 俱乐部ID
+}
+
+message MemberInfo
+{
+    sint64  uId      = 1;  // uid
+    string  nickname = 2;  // 昵称
+    string  avatar   = 3;  // 头像
+    sint64  joinTime = 4;  // 加入时间
+    sint32  position = 5;  // 职位
+}
+
+// 成员列表
+message ClubMemberListReq
+{
+    sint64 clubId    = 1;  // 俱乐部ID
+    sint32 pageIndex = 2;  // 分页(50一页)
+}
+
+message ClubMemberListResp
+{
+    sint32 resultCode         = 1;  // 0 成功
+    sint64 clubId             = 2;  // 俱乐部ID
+    sint32 memberCount        = 3;  // 成员数量
+    repeated MemberInfo infos = 4;  // 成员信息
+}
+
+// 申请列表
+message ClubApplyListReq
+{
+    sint32 clubId     = 1;      // 俱乐部ID
+    sint32 pageIndex  = 2;      // 分页(50一页)
+}
+
+message ClubApplyListResp
+{
+    message CProtoItem
+    {
+        sint64 uId          = 1;  // 玩家UID
+        string nickname     = 2;  // 昵称
+        string avatar       = 3;  // 头像
+        sint64 time         = 4;  // 申请时间
+    }
+    
+    sint32 resultCode         = 1;      // 0 成功
+    sint64 clubId             = 2;      // 俱乐部ID
+    sint32 itemCount          = 3;      // 申请信息数量
+    repeated CProtoItem items = 4;      // 申请信息列表
+}
+
+// 审核入会申请
+message AuditApplyReq
+{
+    sint64 clubId    = 1;  // 俱乐部ID
+    sint64 targetUid = 2;  // 申请者ID
+    bool  agree      = 3;  // 是否同意
+}
+
+message AuditApplyResp
+{
+    sint32 resultCode = 1;  // 结果码 0 成功
+    sint64 clubId     = 2;  // 俱乐部ID
+    sint64 targetUid  = 3;  // 申请者UID
+    bool   agree      = 4;  // 是否同意
+}
+
+// 查询俱乐部信息
+message GetClubInfoReq
+{
+    sint64 clubId = 1; // 俱乐部ID
+}
+
+message GetClubInfoResp
+{
+    sint32 resultCode = 1;  // 结果码 0 成功
+    ClubInfo clubInfo = 2;  // 俱乐部信息 
+}
